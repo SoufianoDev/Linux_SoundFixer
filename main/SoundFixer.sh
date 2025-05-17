@@ -215,3 +215,29 @@ else
   cleanup
   exit 0
 fi
+
+# --- Auto-start setup section ---
+setup_autostart() {
+  AUTOSTART_SERVICE="$HOME/.config/systemd/user/soundfixer.service"
+  mkdir -p "$HOME/.config/systemd/user"
+  cat > "$AUTOSTART_SERVICE" <<EOF
+[Unit]
+Description=SoundFixer Auto Start
+
+[Service]
+Type=simple
+ExecStart=$PWD/$(basename "$0")
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+
+  systemctl --user daemon-reload
+  systemctl --user enable --now soundfixer.service
+}
+
+# Only set up autostart if not already enabled and running in a user session
+if [ -n "$XDG_SESSION_TYPE" ] && [ ! -f "$HOME/.config/systemd/user/soundfixer.service" ]; then
+  setup_autostart
+fi

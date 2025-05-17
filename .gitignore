@@ -1,0 +1,15 @@
+*.class
+/target/
+/out/
+*.jar
+*.war
+*.ear
+*.log
+logs/
+temp/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+main/build/PackageBuilder.java
+main/build/build_packages.sh

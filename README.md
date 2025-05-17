@@ -126,7 +126,7 @@ Contributions welcome! Fork the repo, create a feature branch, commit, push, and
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](https://github.com/SoufianoDev/Linux_SoundFixer/blob/main/LICENCE).
 
 ---
 

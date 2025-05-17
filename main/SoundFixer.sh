@@ -103,6 +103,33 @@ open_github_once() {
   fi
 }
 
+# Function to launch pavucontrol and ensure it's visible
+launch_pavucontrol() {
+  # Close any existing instances
+  pkill pavucontrol
+
+  # Wait a moment to ensure previous instances are closed
+  sleep 1
+  
+  # Start pavucontrol with window focus (using different methods for compatibility)
+  if command -v wmctrl >/dev/null 2>&1; then
+    # Launch pavucontrol
+    pavucontrol >/dev/null 2>&1 &
+    PAVUCONTROL_PID=$!
+    
+    # Wait for window to appear then focus it
+    sleep 2
+    wmctrl -a "Volume Control" >/dev/null 2>&1
+  else
+    # If wmctrl not available, try basic approach
+    pavucontrol >/dev/null 2>&1 &
+    PAVUCONTROL_PID=$!
+  fi
+  
+  # Ensure process continues in background
+  disown $PAVUCONTROL_PID
+}
+
 # Main installation function
 install_audio_fix() {
   # Step 1: Update packages
@@ -137,7 +164,7 @@ install_audio_fix() {
 
   # Step 4: Install control panel
   echo -ne "${YELLOW}Setting up control panel...${NC}"
-  if run_silent sudo apt-get install -y pavucontrol; then
+  if run_silent sudo apt-get install -y pavucontrol wmctrl; then
     echo -e "${GREEN} Done${NC}"
   else
     SUCCESS=false
@@ -165,15 +192,62 @@ install_audio_fix() {
     return 1
   fi
 
-  # Step 7: Start control panel
-  echo -ne "${YELLOW}Finalizing setup...${NC}"
-  if ! pgrep pavucontrol > /dev/null; then
-    nohup pavucontrol >/dev/null 2>&1 &
-    disown
-  fi
+  # Step 7: Launch audio control panel
+  echo -ne "${YELLOW}Launching audio control panel...${NC}"
+  launch_pavucontrol
   echo -e "${GREEN} Done${NC}"
   
   return 0
+}
+
+# Setup autostart for both the script and pavucontrol
+setup_autostart() {
+  # Create necessary directories
+  mkdir -p "$HOME/.config/systemd/user"
+  mkdir -p "$HOME/.config/autostart"
+  
+  # 1. Create systemd user service for SoundFixer
+  AUTOSTART_SERVICE="$HOME/.config/systemd/user/soundfixer.service"
+  cat > "$AUTOSTART_SERVICE" <<EOF
+[Unit]
+Description=SoundFixer Audio System
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=$(readlink -f "$0")
+RemainAfterExit=true
+
+[Install]
+WantedBy=graphical-session.target
+EOF
+
+  # 2. Create desktop entry for pavucontrol
+  PAVUCONTROL_DESKTOP="$HOME/.config/autostart/soundfixer-pavucontrol.desktop"
+  cat > "$PAVUCONTROL_DESKTOP" <<EOF
+[Desktop Entry]
+Type=Application
+Name=SoundFixer Audio Panel
+Exec=pavucontrol
+Icon=pavucontrol
+Comment=Audio Control Panel for SoundFixer
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=plasma-workspace
+Categories=AudioVideo;Audio;Mixer;
+Terminal=false
+StartupNotify=true
+StartupWMClass=pavucontrol
+EOF
+
+  # Make the desktop file executable
+  chmod +x "$PAVUCONTROL_DESKTOP"
+
+  # Enable the systemd service
+  systemctl --user daemon-reload
+  systemctl --user enable soundfixer.service
+  
+  echo -e "${GREEN}Autostart configured successfully!${NC}"
 }
 
 # Run in foreground if terminal is visible
@@ -185,9 +259,15 @@ if [ -t 1 ]; then
   echo
 
   install_audio_fix
+  
+  # Always set up autostart for future boots
+  echo -ne "${YELLOW}Configuring autostart at boot...${NC}"
+  setup_autostart
+  echo -e "${GREEN} Done${NC}"
 
   if $SUCCESS; then
     echo -e "${GREEN}Audio system optimization completed successfully!${NC}"
+    echo -e "${GREEN}The audio control panel will now open automatically at each system startup.${NC}"
     
     # Display farewell with developer info
     echo
@@ -212,32 +292,7 @@ else
   # Run in background if not in terminal
   SHOW_GITHUB=false
   install_audio_fix
+  setup_autostart
   cleanup
   exit 0
-fi
-
-# --- Auto-start setup section ---
-setup_autostart() {
-  AUTOSTART_SERVICE="$HOME/.config/systemd/user/soundfixer.service"
-  mkdir -p "$HOME/.config/systemd/user"
-  cat > "$AUTOSTART_SERVICE" <<EOF
-[Unit]
-Description=SoundFixer Auto Start
-
-[Service]
-Type=simple
-ExecStart=$PWD/$(basename "$0")
-Restart=on-failure
-
-[Install]
-WantedBy=default.target
-EOF
-
-  systemctl --user daemon-reload
-  systemctl --user enable --now soundfixer.service
-}
-
-# Only set up autostart if not already enabled and running in a user session
-if [ -n "$XDG_SESSION_TYPE" ] && [ ! -f "$HOME/.config/systemd/user/soundfixer.service" ]; then
-  setup_autostart
 fi

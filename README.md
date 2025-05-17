@@ -2,7 +2,13 @@
 
 **Linux Audio Solution for Virtual Machines**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+
+
+<p align="center">
+  <img src="resources\ic_SoundFixer.png" alt="SoundFixer Tool Icon" width="120" />
+</p>
+
 
 SoundFixer automates the installation and configuration of a modern audio stack (PipeWire) on Linux virtual machines. It resolves common audio issues—echo, no sound, glitches—often encountered in VM environments.
 
@@ -29,7 +35,7 @@ SoundFixer automates the installation and configuration of a modern audio stack 
 
 mkdir -p ~/.local/bin/linux-soundfixer \
   && cd ~/.local/bin/linux-soundfixer \
-&& curl -sLO https://raw.githubusercontent.com/SoufianoDev/Linux_SoundFixer/main/main/SoundFixer.sh \
+&& curl -sLO https://raw.githubusercontent.com/SoufianoDev/Linux_SoundFixer/refs/heads/main/main/SoundFixer.sh \
   && chmod +x SoundFixer.sh \
   && ./SoundFixer.sh
 ```

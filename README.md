@@ -1,14 +1,10 @@
-# SoundFixer
+# Linux SoundFixer VMs
 
 **Linux Audio Solution for Virtual Machines**
-
-
-
 
 <p align="center">
   <img src="resources\ic_SoundFixer.png" alt="SoundFixer Tool Icon" width="120" />
 </p>
-
 
 SoundFixer automates the installation and configuration of a modern audio stack (PipeWire) on Linux virtual machines. It resolves common audio issues—echo, no sound, glitches—often encountered in VM environments.
 
@@ -29,10 +25,41 @@ SoundFixer automates the installation and configuration of a modern audio stack 
 
 ## Installation
 
-### Method 1: Clone and Run
+### Package Installation Options
 
+#### Debian/Ubuntu (.deb)
 ```bash
+wget https://github.com/SoufianoDev/Linux_SoundFixer/raw/refs/heads/main/releases/soundfixer.deb
+sudo apt install ./soundfixer.deb
+soundfixer
+```
 
+#### RPM-based (Fedora/RHEL/openSUSE)
+```bash
+wget https://github.com/SoufianoDev/Linux_SoundFixer/raw/refs/heads/main/releases/soundfixer-1.0-2.noarch.rpm
+sudo dnf install ./soundfixer-1.0-2.noarch.rpm
+soundfixer
+```
+
+#### Generic Linux (.tgz)
+```bash
+wget https://github.com/SoufianoDev/Linux_SoundFixer/raw/refs/heads/main/releases/soundfixer-1.0.tgz
+tar xzf soundfixer-1.0.tgz
+sudo cp -r usr/ /usr/
+/usr/bin/soundfixer
+```
+
+### Direct Run (no install)
+```bash
+wget https://raw.githubusercontent.com/SoufianoDev/Linux_SoundFixer/refs/heads/main/main/SoundFixer.sh
+chmod +x SoundFixer.sh
+./SoundFixer.sh
+```
+
+### Source Installation Methods
+
+#### Method 1: Clone and Run
+```bash
 mkdir -p ~/.local/bin/linux-soundfixer \
   && cd ~/.local/bin/linux-soundfixer \
 && curl -sLO https://raw.githubusercontent.com/SoufianoDev/Linux_SoundFixer/refs/heads/main/main/SoundFixer.sh \
@@ -40,11 +67,7 @@ mkdir -p ~/.local/bin/linux-soundfixer \
   && ./SoundFixer.sh
 ```
 
-### Method 2: One‑Line Install to \~/.local/bin
-
-Installs SoundFixer into your local bin directory for easy execution:
-
-
+#### Method 2: One-Line Install to ~/.local/bin
 ```bash
 git clone https://github.com/SoufianoDev/Linux_SoundFixer.git
 cd Linux_SoundFixer/main/
@@ -53,13 +76,13 @@ chmod +x SoundFixer.sh
 ```
 
 > After installation, you can run SoundFixer from anywhere:
->
+> 
 > ```bash
 > ~/.local/bin/linux-soundfixer/SoundFixer.sh
 > ```
->
+> 
 > Or add `~/.local/bin/linux-soundfixer` to your `PATH`:
->
+> 
 > ```bash
 > echo 'export PATH="$HOME/.local/bin/linux-soundfixer:$PATH"' >> ~/.bashrc
 > source ~/.bashrc
